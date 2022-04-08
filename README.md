@@ -1,5 +1,6 @@
 # RandomizedQuasiMonteCarlo
 
+Code is inspired from Owen's `R` implementation that can be found [here](https://artowen.su.domains/code/rsobol.R).
 ```julia
 using RandomizedQuasiMonteCarlo
 m = 7
