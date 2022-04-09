@@ -14,9 +14,6 @@ end
 
 function shift!(x)
     d = size(x, 2)
-    s = rand(d)
-    for i in 1:size(x, 1)
-        x[i, :] += s
-    end
-    frac!(x)
+    s = zeros(d)
+    shift!(x, s)
 end

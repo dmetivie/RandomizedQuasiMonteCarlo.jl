@@ -1,7 +1,7 @@
 module RandomizedQuasiMonteCarlo
 
-using CSV, DataFrames
 using DelimitedFiles
+using Random: rand!
 using LinearAlgebra: I
 
 include("sobol.jl")
