@@ -1,4 +1,4 @@
-function sobol_pts2bits(m, s, M; file = joinpath(string(pkgdir(RandomizedQuasiMonteCarlo)),"src/data/fiftysobol.col"))
+function sobol_pts2bits(m, s, M; file=joinpath(string(pkgdir(RandomizedQuasiMonteCarlo)), file_name(s)))
     # Get array of sobol' bits.
     # Calls int2bits and sobol_generating_matrix
     # M must be the number of columns of data in the file named fn
@@ -18,14 +18,16 @@ function sobol_pts2bits(m, s, M; file = joinpath(string(pkgdir(RandomizedQuasiMo
     return y
 end
 
+file_name(s) = s ≤ 50 ? "src/data/fiftysobol.col" : "src/data/sobol_Cs.col"
+
 function sobol_generating_matrix(file, s, M)
     # main workhorse function for sobol_pts2bits
     # Return an array of sobol' matrices.
     # Not tuned for efficiency in time or space.
     # For instance, the matrices have many zeros.
     #
-    col = CSV.read(file, DataFrame, header=false) # D.M. Consider the first line as first line and not a header
-    @assert s ≤ nrow(col) "Not enough colunns in file fn = $fn. There should be at least s = $s."
+    col = readdlm(file, Int) #? Just export s line directly
+    @assert s ≤ size(col, 1) "Not enough colunns in file fn = $fn. There should be at least s = $s."
     a = BitArray(undef, (s, M, M))
     for j in 1:s
         for k in 1:M

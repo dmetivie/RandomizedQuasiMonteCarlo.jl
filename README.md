@@ -4,10 +4,10 @@ Code is inspired from Owen's `R` implementation that can be found [here](https:/
 ```julia
 using RandomizedQuasiMonteCarlo
 m = 7
-N = 2^m
+N = 2^m # Number of points
 d = 2 # dimension
 
-u_uniform = rand(N, d)
+u_uniform = rand(N, d) # i.i.d. uniform
 
 unrandomized_bits = sobol_pts2bits(m, d, 32)
 indices = sobol_indices(unrandomized_bits) #32 bit version
