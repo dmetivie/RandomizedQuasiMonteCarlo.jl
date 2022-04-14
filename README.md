@@ -1,6 +1,13 @@
 # RandomizedQuasiMonteCarlo
+Documentation in construction.
+The purpose of this package is to provide randomization method of low discrepancy sequences.
 
-Code is inspired from Owen's `R` implementation that can be found [here](https://artowen.su.domains/code/rsobol.R).
+So far only [nested uniform scrambling](https://link.springer.com/chapter/10.1007/978-1-4612-2552-2_19), Cranley Patterson Rotation (shift) and Linear Matrix Scrambling.
+
+Compared to over Quasi Monte Carlo package the focus here is not to generate low discrepency sequences $\xi_1,\cdots,\xi_N$ (Sobol', lattice, ...) but on randomization of these sequences $\xi_1,\cdots,\xi_N \to x_1,\cdots,x_N$.
+The purpose is to obtain many independent realizations of $ by using the functions `shift!`, `scrambling`, etc.
+
+The scrambling code is inspired from Owen's `R` implementation that can be found [here](https://artowen.su.domains/code/rsobol.R).
 ```julia
 using RandomizedQuasiMonteCarlo
 m = 7

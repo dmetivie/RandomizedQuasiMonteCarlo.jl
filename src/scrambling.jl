@@ -1,4 +1,4 @@
-struct NestedUniformScrambler{F<:AbstractArray{Bool,3},T<:AbstractArray{I,3} where {I<:Integer}} <: SamplingAlgorithm
+struct NestedUniformScrambler{F<:AbstractArray{Bool,3},T<:AbstractArray{I,3} where {I<:Integer}} <: RandomizationMethod
     Bit::F
     Index::T
 end
@@ -64,7 +64,7 @@ function which_permutation(bits::AbstractArray{Bool,3})
     return indices .+ 1
 end
 
-struct LinearMatrixScrambler{F<:AbstractArray{Bool,3}} <: SamplingAlgorithm
+struct LinearMatrixScrambler{F<:AbstractArray{Bool,3}} <: RandomizationMethod
     Bit::F
 end
 """

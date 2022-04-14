@@ -1,8 +1,3 @@
-function frac!(x)
-    for i in eachindex(x)
-        x[i] -= floor(x[i])
-    end
-end
 
 function shift!(x, s)
     rand!(s)
@@ -16,4 +11,10 @@ function shift!(x)
     d = size(x, 2)
     s = zeros(d)
     shift!(x, s)
+end
+
+function frac!(x)
+    for i in eachindex(x)
+        x[i] -= floor(x[i])
+    end
 end

@@ -6,7 +6,7 @@ using LinearAlgebra: I, UnitLowerTriangular
 
 include("conversion.jl")
 include("sobol.jl")
-abstract type SamplingAlgorithm end
+abstract type RandomizationMethod end
 include("scrambling.jl")
 include("shifting.jl")
 
