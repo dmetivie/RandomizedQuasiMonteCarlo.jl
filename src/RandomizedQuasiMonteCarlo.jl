@@ -4,6 +4,7 @@ using DelimitedFiles
 using Random: rand!
 using LinearAlgebra: I, UnitLowerTriangular
 
+include("conversion.jl")
 include("sobol.jl")
 abstract type SamplingAlgorithm end
 include("scrambling.jl")
@@ -14,6 +15,6 @@ export NestedUniformScrambler, LinearMatrixScrambler
 export sobol_pts2bits
 export which_permutation
 export nested_uniform_scramble_bit!, linear_matrix_scramble_bit!
-export bits2unif
+export bits2unif, unif2bits
 
 end
