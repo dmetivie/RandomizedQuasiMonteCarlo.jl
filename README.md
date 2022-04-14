@@ -6,6 +6,7 @@ So far only [nested uniform scrambling](https://link.springer.com/chapter/10.100
 
 Compared to over Quasi Monte Carlo package the focus here is not to generate low discrepancy sequences `(ξ₁, ..., ξₙ)` (Sobol', lattice, ...) but on randomization of these sequences `(ξ₁, ..., ξₙ) → (x₁, ..., xₙ)`.
 The purpose is to obtain many independent realizations of `(x₁, ..., xₙ)` by using the functions `shift!`, `scrambling!`, etc.
+The original sequences can be obtained for example via the [QuasiMonteCarlo.jl](https://github.com/SciML/QuasiMonteCarlo.jl) package.
 
 The scrambling code is inspired from Owen's `R` implementation that can be found [here](https://artowen.su.domains/code/rsobol.R).
 ```julia
