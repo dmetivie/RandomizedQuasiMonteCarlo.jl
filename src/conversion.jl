@@ -12,15 +12,15 @@ function bits2unif(bits::BitArray)
     y
 end
 
-function unif2bits(y; M = 32)
+function unif2bits(y; M = 32, b = 2)
     # Turn a point in [0,1) into sequence of bits 
     # First bits are highest order
     bits = BitArray(zeros(M))
     for j in 1:M
-        a = y - 1 / 2^j
-        b = a ≥ 0
-        bits[j] = b
-        if b 
+        a = y - 1 / b^j
+        bⱼ = a ≥ 0
+        bits[j] = bⱼ
+        if bⱼ
             y = a
         end
     end
