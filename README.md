@@ -4,8 +4,8 @@ The purpose of this package is to provide randomization method of low discrepanc
 
 So far only [nested uniform scrambling](https://link.springer.com/chapter/10.1007/978-1-4612-2552-2_19), Cranley Patterson Rotation (shift) and Linear Matrix Scrambling.
 
-Compared to over Quasi Monte Carlo package the focus here is not to generate low discrepancy sequences `ξ₁, ..., ξₙ` (Sobol', lattice, ...) but on randomization of these sequences `ξ₁, ..., ξₙ \to x₁, ..., xₙ`.
-The purpose is to obtain many independent realizations of `X₁, ..., Xₙ` by using the functions `shift!`, `scrambling`, etc.
+Compared to over Quasi Monte Carlo package the focus here is not to generate low discrepancy sequences `(ξ₁, ..., ξₙ)` (Sobol', lattice, ...) but on randomization of these sequences `(ξ₁, ..., ξₙ) → (x₁, ..., xₙ)`.
+The purpose is to obtain many independent realizations of `(x₁, ..., xₙ)` by using the functions `shift!`, `scrambling!`, etc.
 
 The scrambling code is inspired from Owen's `R` implementation that can be found [here](https://artowen.su.domains/code/rsobol.R).
 ```julia
