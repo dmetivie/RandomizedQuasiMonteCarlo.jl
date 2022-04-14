@@ -1,4 +1,4 @@
-function sobol_pts2bits(m, s, M; file=joinpath(string(pkgdir(RandomizedQuasiMonteCarlo)), file_name(s)))
+function sobol_pts2bits(m, s, M; file=joinpath(@__DIR__, "data", file_name(s)))
     # Get array of sobol' bits.
     # Calls int2bits and sobol_generating_matrix
     # M must be the number of columns of data in the file named fn
@@ -18,7 +18,7 @@ function sobol_pts2bits(m, s, M; file=joinpath(string(pkgdir(RandomizedQuasiMont
     return y
 end
 
-file_name(s) = s ≤ 50 ? "src/data/fiftysobol.col" : "src/data/sobol_Cs.col"
+file_name(s) = s ≤ 50 ? "fiftysobol.col" : "sobol_Cs.col"
 
 function sobol_generating_matrix(file, s, M)
     # main workhorse function for sobol_pts2bits
@@ -36,22 +36,6 @@ function sobol_generating_matrix(file, s, M)
     end
     return a
 end
-
-function sobol_indices(sobol_bits)
-    n, s = size(sobol_bits, 1), size(sobol_bits, 2)
-    m = Int(log2(n)) #? Should it be always 32 instead of that?
-    indices = zeros(Int, s, m, n)
-    for j in 1:s
-        indices[j, 1, :] = zeros(Int, n) # same permutation for all observations i
-        for k in 2:m                     # Here is where we want m > 0 so the loop works ok
-            bitmat = sobol_bits[:, j, :] # slice on dim j to get a matrix
-            bitmat = bitmat[:, 1:(k-1)]  #
-            indices[j, k, :] = bits2int(bitmat) # index of which perms to use at bit k for each i
-        end
-    end
-    return indices
-end
-
 
 """
 Utilities
