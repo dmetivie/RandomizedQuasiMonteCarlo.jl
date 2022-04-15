@@ -2,16 +2,32 @@ struct NestedUniformScrambler{F<:AbstractArray{Bool,3},T<:AbstractArray{I,3} whe
     Bit::F
     Index::T
 end
-"""
+""" 
 Owen (1995) Nested Uniform Scrambling
 """
-function scramble!(random_points::AbstractArray, random_bits::AbstractArray{Bool,3}, sampler::NestedUniformScrambler)
-    nested_uniform_scramble_bit!(random_bits, sampler.Bit, sampler.Index)
-    for s in 1:size(random_points, 2), i in 1:size(random_points, 1)
-        random_points[i, s] = bits2unif(random_bits[i, s, :])
+function nested_uniform_scramble(points::AbstractArray; M=32)
+    n, s = size(points)
+    unrandomized_bits = BitArray(undef, n, s, M)
+    random_bits = similar(unrandomized_bits)
+    for i in eachindex(view(points, 1:n, 1:s))
+        unrandomized_bits[i, :] = unif2bits(points[i]; M = M)
     end
+    indices = which_permutation(unrandomized_bits)
+    nested_uniform_scramble_bit!(random_bits, unrandomized_bits, indices)
+    random_points = similar(points)
+    for i in eachindex(view(random_points, 1:n, 1:s))
+        random_points[i] = bits2unif(random_bits[i, :])
+    end
+    return random_points
 end
 
+function scramble!(random_points::AbstractArray, random_bits::AbstractArray{Bool,3}, sampler::NestedUniformScrambler)
+    nested_uniform_scramble_bit!(random_bits, sampler.Bit, sampler.Index)
+    for i in eachindex(view(random_points, 1:size(random_points, 1), 1:size(random_points, 2)))
+        random_points[i] = bits2unif(random_bits[i, :])
+    end
+end
+# Note that we use rand(Bool) instead of bitrand() which seems faster for small array (but longer for larger which for m ≃ 20 is not achieved)
 function nested_uniform_scramble_bit!(random_bits::AbstractArray{Bool,3}, thebits::AbstractArray{Bool,3}, indices::AbstractArray{T,3} where {T<:Integer})
     # in place Scramble Sobol' bits; nested uniform.
     #
