@@ -27,7 +27,8 @@ function unif2bits(y; M = 32, b = 2)
     bits
 end
 
-function bits2int(b)
+#? TODO is it better to use this vectorized version or a bit(s)2int version?
+function bits2int(b::BitMatrix)
     # Convert bits b into integers.
     # Inverse of int2bits
 
