@@ -1,4 +1,4 @@
-struct NestedUniformScrambler{F<:AbstractArray{Bool,3},T<:AbstractArray{I,3} where {I<:Integer}} <: RandomizationMethod
+struct NestedUniformScrambler{F<:AbstractArray{Bool,3},T<:AbstractArray{I,3} where {I<:Integer}} <: SamplerScrambling{Matrixvariate,Continuous}
     Bit::F
     Index::T
 end
@@ -7,12 +7,11 @@ Owen (1995) Nested Uniform Scrambling
 """
 function nested_uniform_scramble(points::AbstractArray; M=32)
     n, s = size(points)
+    @assert isinteger(log2(n)) "n must be of the form n=2ᵐ with m ≥ 0"
     unrandomized_bits = BitArray(undef, n, s, M)
+    indices = zeros(Int, n, Int(log2(n)), s)
+    prepare_nested_uniform_scramble!(unrandomized_bits, indices, points)
     random_bits = similar(unrandomized_bits)
-    for i in eachindex(view(points, 1:n, 1:s))
-        unrandomized_bits[i, :] = unif2bits(points[i]; M = M)
-    end
-    indices = which_permutation(unrandomized_bits)
     nested_uniform_scramble_bit!(random_bits, unrandomized_bits, indices)
     random_points = similar(points)
     for i in eachindex(view(random_points, 1:n, 1:s))
@@ -21,14 +20,33 @@ function nested_uniform_scramble(points::AbstractArray; M=32)
     return random_points
 end
 
-function scramble!(random_points::AbstractArray, random_bits::AbstractArray{Bool,3}, sampler::NestedUniformScrambler)
-    nested_uniform_scramble_bit!(random_bits, sampler.Bit, sampler.Index)
+function prepare_nested_uniform_scramble(points)
+    n, s = size(points)
+    @assert isinteger(log2(n)) "n must be of the form n=2ᵐ with m ≥ 0"
+    unrandomized_bits = BitArray(undef, n, s, M)
+    indices = zeros(Int, n, Int(log2(n)), s)
+    prepare_nested_uniform_scramble!(unrandomized_bits, indices, points)
+    return NestedUniformScrambler(unrandomized_bits, indices)
+end
+
+function prepare_nested_uniform_scramble!(bits, indices, points)
+    for i in eachindex(view(points, 1:size(bits, 1), 1:size(bits, 2)))
+        bits[i, :] = unif2bits(points[i]; M=size(bits, 3))
+    end
+    indices[:] = which_permutation(unrandomized_bits)
+end
+
+function scramble!(rng::AbstractRNG, random_points::AbstractArray, random_bits::AbstractArray{Bool,3}, sampler::NestedUniformScrambler)
+    nested_uniform_scramble_bit!(rng, random_bits, sampler.Bit, sampler.Index)
     for i in eachindex(view(random_points, 1:size(random_points, 1), 1:size(random_points, 2)))
         random_points[i] = bits2unif(random_bits[i, :])
     end
 end
+
+scramble!(random_points::AbstractArray, random_bits::AbstractArray{Bool,3}, sampler::NestedUniformScrambler) = scramble!(default_rng(), random_points, random_bits, sampler)
+
 # Note that we use rand(Bool) instead of bitrand() which seems faster for small array (but longer for larger which for m ≃ 20 is not achieved)
-function nested_uniform_scramble_bit!(random_bits::AbstractArray{Bool,3}, thebits::AbstractArray{Bool,3}, indices::AbstractArray{T,3} where {T<:Integer})
+function nested_uniform_scramble_bit!(rng::AbstractRNG, random_bits::AbstractArray{Bool,3}, thebits::AbstractArray{Bool,3}, indices::AbstractArray{T,3} where {T<:Integer})
     # in place Scramble Sobol' bits; nested uniform.
     #
     n, m, s = size(indices)
@@ -36,18 +54,18 @@ function nested_uniform_scramble_bit!(random_bits::AbstractArray{Bool,3}, thebit
     @assert m ≥ 1 "We need m ≥ 1" # m=0 causes awkward corner case below.  Caller handles that case specially.
 
     for j in 1:s
-        theperms = getpermset2(m)          # Permutations to apply to bits 1:m
+        theperms = getpermset2(rng, m)          # Permutations to apply to bits 1:m
         for k in 1:m                             # Here is where we want m > 0 so the loop works ok
             random_bits[:, j, k] = thebits[:, j, k] .⊻ theperms[k, indices[:, k, j]]   # permutation by adding a bit modulo 2 here with xor operator (only for base 2)
             # random_bits[:, j, k] = (thebits[:, j, k] + theperms[k][indices[j, k, :]]) .% b   # permutation by adding a bit modulo b
         end
     end
     if M > m     # Paste in random entries for bits after m'th one
-        random_bits[:, :, (m+1):M] = rand(Bool, n * s * (M - m))
+        random_bits[:, :, (m+1):M] = rand(rng, Bool, n * s * (M - m))
     end
 end
 
-function getpermset2(J::Integer)
+function getpermset2(rng::AbstractRNG, J::Integer)
     # Get 2^(j-1) random binary permutations for j=1 ... J
     # J will ordinarily be m when there are n=2^m points
     #
@@ -59,7 +77,7 @@ function getpermset2(J::Integer)
     y = BitMatrix(undef, J, 2^(J - 1))
     for j in 1:J
         nj = 2^(j - 1)
-        y[j, 1:nj] = rand(Bool, nj)
+        y[j, 1:nj] = rand(rng, Bool, nj)
     end
     return y
 end
@@ -80,7 +98,7 @@ function which_permutation(bits::AbstractArray{Bool,3})
     return indices .+ 1
 end
 
-struct LinearMatrixScrambler{F<:AbstractArray{Bool,3}} <: RandomizationMethod
+struct LinearMatrixScrambler{F<:AbstractArray{Bool,3}} <: SamplerScrambling{Matrixvariate,Continuous}
     Bit::F
 end
 """
