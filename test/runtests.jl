@@ -1,6 +1,7 @@
 using RandomizedQuasiMonteCarlo
 using Test
 
+#? What to test execpt function? Discrepency?
 @testset "RandomizedQuasiMonteCarlo.jl" begin
     m = 7
     N = 2^m # Number of points
@@ -15,9 +16,9 @@ using Test
     lms = LinearMatrixScrambler(unrandomized_bits)
 
     u_sob = dropdims(mapslices(bits2unif, unrandomized_bits, dims=3), dims=3)
-    u_nus = similar(u_sob)
-    u_lms = similar(u_sob)
-    u_shift = similar(u_sob)
+    u_nus = copy(u_sob)
+    u_lms = copy(u_sob)
+    u_shift = copy(u_sob)
 
     scramble!(u_nus, random_bits, nus)
     scramble!(u_lms, random_bits, lms)

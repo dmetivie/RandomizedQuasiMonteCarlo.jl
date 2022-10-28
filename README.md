@@ -26,10 +26,9 @@ nus = NestedUniformScrambler(unrandomized_bits, indices)
 lms = LinearMatrixScrambler(unrandomized_bits)
 
 u_sob = dropdims(mapslices(bits2unif, unrandomized_bits, dims=3), dims=3)
-u_nus = similar(u_sob)
-u_lms = similar(u_sob)
-u_shift = similar(u_sob)
-
+u_nus = copy(u_sob)
+u_lms = copy(u_sob)
+u_shift = copy(u_sob)
 
 scramble!(u_nus, random_bits, nus)
 scramble!(u_lms, random_bits, lms)
@@ -46,6 +45,7 @@ default(
     grid=true,
     framestyle=:default
 )
+
 begin
     d1 = 1
     d2 = 2
@@ -54,7 +54,7 @@ begin
     p = [plot(thickness_scaling=2, aspect_ratio=:equal) for i in sequences]
     for (i, x) in enumerate(sequences)
         scatter!(p[i], x[:, d1], x[:, d2], ms=0.9, c=1, grid=false)
-        xlabel!(names[i])
+        title!(names[i])
         xlims!(p[i], (0, 1))
         ylims!(p[i], (0, 1))
         yticks!(p[i], [0, 1])

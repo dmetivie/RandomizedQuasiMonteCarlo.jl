@@ -1,3 +1,9 @@
+function shift!(x::AbstractMatrix{<:Real})
+    d = size(x, 2)
+    s = zeros(d)
+    shift!(x, s)
+end
+
 function shift!(x::AbstractMatrix{<:Real}, s::AbstractVector{<:Real})
     rand!(s)
     for i in 1:size(x, 1)
@@ -6,11 +12,6 @@ function shift!(x::AbstractMatrix{<:Real}, s::AbstractVector{<:Real})
     frac!(x)
 end
 
-function shift!(x::AbstractMatrix{<:Real})
-    d = size(x, 2)
-    s = zeros(d)
-    shift!(x, s)
-end
 
 function frac!(x)
     for i in eachindex(x)
