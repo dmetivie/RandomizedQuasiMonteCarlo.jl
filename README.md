@@ -1,4 +1,5 @@
 # RandomizedQuasiMonteCarlo
+
 Documentation in construction.
 The purpose of this package is to provide randomization method of low discrepancy sequences.
 
@@ -8,7 +9,8 @@ Compared to over Quasi Monte Carlo package the focus here is not to generate low
 The purpose is to obtain many independent realizations of `(x₁, ..., xₙ)` by using the functions `shift!`, `scrambling!`, etc.
 The original sequences can be obtained for example via the [QuasiMonteCarlo.jl](https://github.com/SciML/QuasiMonteCarlo.jl) package.
 
-The scrambling code is inspired from Owen's `R` implementation that can be found [here](https://artowen.su.domains/code/rsobol.R).
+The scrambling codes is inspired from Owen's `R` implementation that can be found [here](https://artowen.su.domains/code/rsobol.R).
+
 ```julia
 using RandomizedQuasiMonteCarlo
 m = 7
@@ -18,7 +20,7 @@ d = 2 # dimension
 u_uniform = rand(N, d) # i.i.d. uniform
 
 unrandomized_bits = sobol_pts2bits(m, d, 32)
-indices = sobol_indices(unrandomized_bits) #32 bit version
+indices = which_permutation(unrandomized_bits) #32 bit version
 random_bits = similar(unrandomized_bits) # 32 bit version
 nus = NestedUniformScrambler(unrandomized_bits, indices)
 lms = LinearMatrixScrambler(unrandomized_bits)
@@ -26,9 +28,12 @@ lms = LinearMatrixScrambler(unrandomized_bits)
 u_sob = dropdims(mapslices(bits2unif, unrandomized_bits, dims=3), dims=3)
 u_nus = similar(u_sob)
 u_lms = similar(u_sob)
+u_shift = similar(u_sob)
+
 
 scramble!(u_nus, random_bits, nus)
 scramble!(u_lms, random_bits, lms)
+shift!(u_shift)
 
 # Plot #
 using Plots, LaTeXStrings
@@ -44,8 +49,8 @@ default(
 begin
     d1 = 1
     d2 = 2
-    sequences = [u_uniform, u_sob, u_nus, u_lms]
-    names = ["Uniform", "Sobol (unrandomized)", "Nested Uniform Scrambling", "Linear Matrix Scrambling"]
+    sequences = [u_uniform, u_sob, u_nus, u_lms, u_shift]
+    names = ["Uniform", "Sobol (unrandomized)", "Nested Uniform Scrambling", "Linear Matrix Scrambling", "Shift"]
     p = [plot(thickness_scaling=2, aspect_ratio=:equal) for i in sequences]
     for (i, x) in enumerate(sequences)
         scatter!(p[i], x[:, d1], x[:, d2], ms=0.9, c=1, grid=false)
@@ -62,4 +67,5 @@ begin
     plot(p..., size=(1500, 900))
 end
 ```
+
 ![different_scrambling_N_128.svg](img/different_scrambling_N_128.svg)
