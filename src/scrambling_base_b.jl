@@ -77,9 +77,12 @@ function getpermset(rng::AbstractRNG, J::Integer, b::Integer)
 end
 
 getpermset(J::Integer, b::Integer) = getpermset(Random.GLOBAL_RNG, J, b)
+
 """
     which_permutation(bits::AbstractArray{<:Integer,3}, b)
-Assign at each points (for every dim) a number that will tell which permutation to use. 
+This function is used in Nested Uniform Scramble. 
+It assigns for each points (in every dimensions) `m` number corresponding to its location on the slices 1, 1/b, 1/b², ..., 1/bᵐ⁻¹ of the axes [0,1[.
+This also can be used to verify some equidistribution prorepreties.
 """
 function which_permutation(bits::AbstractArray{<:Integer,3}, b)
     n, d = size(bits, 1), size(bits, 2)
@@ -87,7 +90,7 @@ function which_permutation(bits::AbstractArray{<:Integer,3}, b)
     #! M=32 is probably useless since you check equidistribution up to 1/bᵐ (small m not big M)
     indices = zeros(Int, n, m, d)
     for j in 1:d
-        which_permutation!(@view(indices[:,:,j]), bits[:,j,:], b)
+        which_permutation!(@view(indices[:, :, j]), bits[:, j, :], b)
     end
     return indices
 end
@@ -102,7 +105,7 @@ function which_permutation!(indices::AbstractMatrix{<:Integer}, bits::AbstractMa
 end
 
 #TODO add choice of dims
-function isequidistributed(x::AbstractMatrix, b::Integer; M=32, dims = :all)
+function isequidistributed(x::AbstractMatrix, b::Integer; M=32, dims=:all)
     n, d = size(x)
     @assert isinteger(log(b, n)) "n must be of the form n=bᵐ with m ≥ 0"
     bits = zeros(Int, n, d, M)
@@ -112,7 +115,7 @@ function isequidistributed(x::AbstractMatrix, b::Integer; M=32, dims = :all)
     indices = which_permutation(bits, b)
     bool = zeros(Bool, d)
     for s in 1:d
-        bool[s] = size(unique(indices[:,:,s] , dims = 1), 1) == n÷b
+        bool[s] = size(unique(indices[:, :, s], dims=1), 1) == n ÷ b
     end
     prod(bool)
 end

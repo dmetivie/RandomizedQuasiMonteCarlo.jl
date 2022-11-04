@@ -56,7 +56,7 @@ function nested_uniform_scramble_bit!(rng::AbstractRNG, random_bits::AbstractArr
     for s in 1:d
         theperms = getpermset(rng, m)          # Permutations to apply to bits 1:m
         for k in 1:m                             # Here is where we want m > 0 so the loop works ok
-            random_bits[:, s, k] = thebits[:, j, k] .⊻ theperms[k, indices[:, k, s]]   # permutation by adding a bit modulo 2 here with xor operator (only for base 2)
+            random_bits[:, s, k] = thebits[:, s, k] .⊻ theperms[k, indices[:, k, s]]   # permutation by adding a bit modulo 2 here with xor operator (only for base 2)
         end
     end
     if M > m     # Paste in random entries for bits after m'th one
@@ -81,22 +81,8 @@ function getpermset(rng::AbstractRNG, J::Integer)
 end
 
 getpermset(J::Integer) = getpermset(Random.GLOBAL_RNG, J::Integer)
-"""
-Assign at each points (for every dim) a number that will tell which permutation to use. 
-"""
-function which_permutation(bits::AbstractArray{Bool,3})
-    n, s = size(bits, 1), size(bits, 2)
-    m = Int(log2(n)) #? Should it be always 32 instead of that?
-    indices = zeros(Int, n, m, s)
-    for j in 1:s
-        indices[:, 1, j] = zeros(Int, n) # same permutation for all observations i
-        for k in 2:m                     # Here is where we want m > 0 so the loop works ok
-            bitmat = bits[:, j, 1:(k-1)] # slice on dim j to get a matrix
-            indices[:, k, j] = bits2int(bitmat) # index of which perms to use at bit k for each i
-        end
-    end
-    return indices .+ 1
-end
+
+which_permutation(bits::AbstractArray{Bool,3}) = which_permutation(bits, 2)
 
 struct LinearMatrixScrambler{F<:AbstractArray{Bool,3}} <: SamplerScrambling{Matrixvariate,Continuous}
     Bit::F

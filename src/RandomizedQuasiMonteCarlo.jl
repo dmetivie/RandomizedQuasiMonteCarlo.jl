@@ -1,7 +1,7 @@
 module RandomizedQuasiMonteCarlo
 
 using DelimitedFiles
-using LinearAlgebra: LowerTriangular, Diagonal
+using LinearAlgebra: LowerTriangular, Diagonal, UnitLowerTriangular
 using Random
 using Distributions: Matrixvariate, Continuous
 using Random: default_rng
