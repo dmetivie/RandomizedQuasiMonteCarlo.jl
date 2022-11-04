@@ -20,7 +20,7 @@ function nested_uniform_scramble(points::AbstractArray; M=32)
     return random_points
 end
 
-function prepare_nested_uniform_scramble(points)
+function prepare_nested_uniform_scramble(points::AbstractArray)
     n, s = size(points)
     @assert isinteger(log2(n)) "n must be of the form n=2ᵐ with m ≥ 0"
     unrandomized_bits = BitArray(undef, n, s, M)
@@ -29,11 +29,11 @@ function prepare_nested_uniform_scramble(points)
     return NestedUniformScrambler(unrandomized_bits, indices)
 end
 
-function prepare_nested_uniform_scramble!(bits, indices, points)
+function prepare_nested_uniform_scramble!(bits::AbstractArray{Bool,3}, indices::AbstractArray{<:Integer}, points::AbstractArray)
     for i in eachindex(view(points, 1:size(bits, 1), 1:size(bits, 2)))
         bits[i, :] = unif2bits(points[i]; M=size(bits, 3))
     end
-    indices[:] = which_permutation(unrandomized_bits)
+    indices[:] = which_permutation(bits)
 end
 
 function scramble!(rng::AbstractRNG, random_points::AbstractArray, random_bits::AbstractArray{Bool,3}, sampler::NestedUniformScrambler)
@@ -49,23 +49,22 @@ scramble!(random_points::AbstractArray, random_bits::AbstractArray{Bool,3}, samp
 function nested_uniform_scramble_bit!(rng::AbstractRNG, random_bits::AbstractArray{Bool,3}, thebits::AbstractArray{Bool,3}, indices::AbstractArray{T,3} where {T<:Integer})
     # in place Scramble Sobol' bits; nested uniform.
     #
-    n, m, s = size(indices)
+    n, m, d = size(indices)
     M = size(random_bits, 3)
     @assert m ≥ 1 "We need m ≥ 1" # m=0 causes awkward corner case below.  Caller handles that case specially.
 
-    for j in 1:s
-        theperms = getpermset2(rng, m)          # Permutations to apply to bits 1:m
+    for s in 1:d
+        theperms = getpermset(rng, m)          # Permutations to apply to bits 1:m
         for k in 1:m                             # Here is where we want m > 0 so the loop works ok
-            random_bits[:, j, k] = thebits[:, j, k] .⊻ theperms[k, indices[:, k, j]]   # permutation by adding a bit modulo 2 here with xor operator (only for base 2)
-            # random_bits[:, j, k] = (thebits[:, j, k] + theperms[k][indices[j, k, :]]) .% b   # permutation by adding a bit modulo b
+            random_bits[:, s, k] = thebits[:, j, k] .⊻ theperms[k, indices[:, k, s]]   # permutation by adding a bit modulo 2 here with xor operator (only for base 2)
         end
     end
     if M > m     # Paste in random entries for bits after m'th one
-        random_bits[:, :, (m+1):M] = rand(rng, Bool, n * s * (M - m))
+        random_bits[:, :, (m+1):M] = rand(rng, Bool, n * d * (M - m))
     end
 end
 
-function getpermset2(rng::AbstractRNG, J::Integer)
+function getpermset(rng::AbstractRNG, J::Integer)
     # Get 2^(j-1) random binary permutations for j=1 ... J
     # J will ordinarily be m when there are n=2^m points
     #
@@ -73,7 +72,6 @@ function getpermset2(rng::AbstractRNG, J::Integer)
     # that the for loop doesn't do as desired.
     # The caller will handle that corner case a different way.
     #
-    # Caller has set the seed
     y = BitMatrix(undef, J, 2^(J - 1))
     for j in 1:J
         nj = 2^(j - 1)
@@ -81,6 +79,8 @@ function getpermset2(rng::AbstractRNG, J::Integer)
     end
     return y
 end
+
+getpermset(J::Integer) = getpermset(Random.GLOBAL_RNG, J::Integer)
 """
 Assign at each points (for every dim) a number that will tell which permutation to use. 
 """
@@ -122,7 +122,7 @@ function linear_matrix_scramble_bit!(random_bits::AbstractArray{Bool,3}, thebits
 
     for j in 1:s
         # Permutations matrix and shift to apply to bits 1:m
-        matousek_M, matousek_C = getmatousek2(m)
+        matousek_M, matousek_C = getmatousek(m)
         for k in 2:m                     # not correct for m=1
             bitmat = @view thebits[:, j, 1:(k-1)]
             random_bits[:, j, k] = (thebits[:, j, k] + bitmat * matousek_M[k, 1:(k-1)]) .% 2
@@ -137,7 +137,7 @@ function linear_matrix_scramble_bit!(random_bits::AbstractArray{Bool,3}, thebits
     end
 end
 
-function getmatousek2(J::Integer)
+function getmatousek(J::Integer)
     # Genereate the Matousek linear scramble in base 2 for one of the s components
     # We need a J x J bit matrix M and a length J bit vector C
     #
