@@ -9,7 +9,7 @@ function sobol_pts2bits(m, s, M; file=joinpath(@__DIR__, "data", file_name(s)))
     bitsi = BitArray(undef, M)
     bitsj = zeros(Int, M)
     for i in 1:n
-        int2bits!(bitsi, i - 1, M)   # bits of integer i-1 used for observation i
+        int2bits!(bitsi, i - 1)   # bits of integer i-1 used for observation i
         for j in 1:s
             bitsj[:] = a[j, :, :] * bitsi        # a[j,,] is the sobol' matrix for dimension j
             y[i, j, :] = bitsj .% 2
