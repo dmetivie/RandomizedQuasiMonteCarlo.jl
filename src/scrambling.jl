@@ -7,9 +7,9 @@ Owen (1995) Nested Uniform Scrambling
 """
 function nested_uniform_scramble(points::AbstractArray; M=32)
     n, s = size(points)
-    @assert isinteger(log2(n)) "n must be of the form n=2ᵐ with m ≥ 0"
+    m = log2i(n)
     unrandomized_bits = BitArray(undef, n, s, M)
-    indices = zeros(Int, n, Int(log2(n)), s)
+    indices = zeros(Int, n, m, s)
     prepare_nested_uniform_scramble!(unrandomized_bits, indices, points)
     random_bits = similar(unrandomized_bits)
     nested_uniform_scramble_bit!(random_bits, unrandomized_bits, indices)
@@ -22,9 +22,9 @@ end
 
 function prepare_nested_uniform_scramble(points::AbstractArray)
     n, s = size(points)
-    @assert isinteger(log2(n)) "n must be of the form n=2ᵐ with m ≥ 0"
+    m = log2i(n)
     unrandomized_bits = BitArray(undef, n, s, M)
-    indices = zeros(Int, n, Int(log2(n)), s)
+    indices = zeros(Int, n, m, s)
     prepare_nested_uniform_scramble!(unrandomized_bits, indices, points)
     return NestedUniformScrambler(unrandomized_bits, indices)
 end
@@ -103,7 +103,7 @@ function linear_matrix_scramble_bit!(random_bits::AbstractArray{Bool,3}, thebits
     # in place  bits; nested uniform.
     #
     n, s, M = size(thebits)
-    m = Int(log2(n))
+    m = log2i(n)
     @assert m ≥ 1 "We need m ≥ 1" # m=0 causes awkward corner case below.  Caller handles that case specially.
 
     for j in 1:s

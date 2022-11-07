@@ -8,9 +8,9 @@ Owen (1995) Nested Uniform Scrambling
 """
 function nested_uniform_scramble(points::AbstractArray, b::Integer; M=32)
     n, s = size(points)
-    @assert isinteger(log(b, n)) "n must be of the form n=bᵐ with m ≥ 0"
+    m = logi(b, n)
     unrandomized_bits = zeros(Int, n, s, M)
-    indices = zeros(Int, n, Int(log(b, n)), s)
+    indices = zeros(Int, n, m, s)
     prepare_nested_uniform_scramble!(unrandomized_bits, indices, points, b)
     random_bits = similar(unrandomized_bits)
     nested_uniform_scramble_bit!(random_bits, unrandomized_bits, indices, b)
@@ -23,9 +23,9 @@ end
 
 function prepare_nested_uniform_scramble(points::AbstractArray, b::Integer)
     n, s = size(points)
-    @assert isinteger(log(b, n)) "n must be of the form n=bᵐ with m ≥ 0"
+    m = logi(b, n)
     unrandomized_bits = zeros(Int, n, s, M)
-    indices = zeros(Int, n, Int(log(b, n)), s)
+    indices = zeros(Int, n, m, s)
     prepare_nested_uniform_scramble!(unrandomized_bits, indices, points, b)
     return NestedUniformScrambler_b(unrandomized_bits, indices, b)
 end
@@ -86,7 +86,7 @@ This also can be used to verify some equidistribution prorepreties.
 """
 function which_permutation(bits::AbstractArray{<:Integer,3}, b)
     n, d = size(bits, 1), size(bits, 2)
-    m = Int(log(b, n)) #? Should it be always M = 32 instead of that?
+    m = logi(b, n) #? Should it be always M = 32 instead of that?
     #! M=32 is probably useless since you check equidistribution up to 1/bᵐ (small m not big M)
     indices = zeros(Int, n, m, d)
     for j in 1:d
@@ -107,7 +107,7 @@ end
 #TODO add choice of dims
 function isequidistributed(x::AbstractMatrix, b::Integer; M=32, dims=:all)
     n, d = size(x)
-    @assert isinteger(log(b, n)) "n must be of the form n=bᵐ with m ≥ 0"
+    m = logi(b, n)
     bits = zeros(Int, n, d, M)
     for i in 1:n, s in 1:d
         unif2bits!(@view(bits[i, s, :]), x[i, s], b)
@@ -142,7 +142,7 @@ function linear_matrix_scramble_bit!(rng::AbstractRNG, random_bits::AbstractArra
     # https://statweb.stanford.edu/~owen/mc/ Chapter 17.6 around equation (17.15).
     #
     n, d, M = size(thebits)
-    m = Int(log(b, n))
+    m = logi(b, n)
     @assert m ≥ 1 "We need m ≥ 1" # m=0 causes awkward corner case below.  Caller handles that case specially.
 
     for j in 1:d

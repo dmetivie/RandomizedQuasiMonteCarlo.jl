@@ -8,6 +8,19 @@ using Random: default_rng
 import Distributions: Sampleable
 import Random: _rand!, rand!
 
+# See https://discourse.julialang.org/t/is-there-a-dedicated-function-computing-m-int-log-b-b-m/89776/10
+function logi(b::Int, n::Int)
+    m = round(Int, log(b, n))
+    b^m == n || throw(ArgumentError("$n is not a power of $b"))
+    return m
+end
+
+function log2i(n::Int)
+    m = round(Int, log2(n))
+    2^m == n || throw(ArgumentError("$n is not a power of 2"))
+    return m
+end
+
 include("sampler.jl")
 include("conversion.jl")
 include("sobol.jl")
