@@ -4,37 +4,40 @@ struct NestedUniformScrambler_b{F<:AbstractArray{<:Integer,3},T<:AbstractArray{<
     base::Integer
 end
 """ 
-Owen (1995) Nested Uniform Scrambling
+    nested_uniform_scramble(points::AbstractArray; M=32)
+Return a scrambled version of the `points`. 
+The scrambling method is Nested Uniform Scrambling which was introduced in Owen (1995).
+M is the number of bits used for each points. One need M ≥ log(base, n). 
 """
-function nested_uniform_scramble(points::AbstractArray, b::Integer; M=32)
-    n, s = size(points)
+function nested_uniform_scramble(rng::AbstractRNG, points::AbstractArray, b::Integer; M=32)
+    n, d = size(points)
     m = logi(b, n)
-    unrandomized_bits = zeros(Int, n, s, M)
-    indices = zeros(Int, n, m, s)
+    unrandomized_bits = zeros(Int, n, d, M)
+    indices = zeros(Int, n, m, d)
     prepare_nested_uniform_scramble!(unrandomized_bits, indices, points, b)
     random_bits = similar(unrandomized_bits)
-    nested_uniform_scramble_bit!(random_bits, unrandomized_bits, indices, b)
+    nested_uniform_scramble_bit!(rng, random_bits, unrandomized_bits, indices, b)
     random_points = similar(points)
-    for i in eachindex(view(random_points, 1:n, 1:s))
+    for i in eachindex(view(random_points, 1:n, 1:d))
         random_points[i] = bits2unif(random_bits[i, :], b)
     end
     return random_points
 end
 
+nested_uniform_scramble(points::AbstractArray, b::Integer; M=32) = nested_uniform_scramble(Random.default_rng(), points, b::Integer; M=M)
+
 function prepare_nested_uniform_scramble(points::AbstractArray, b::Integer)
-    n, s = size(points)
+    n, d = size(points)
     m = logi(b, n)
-    unrandomized_bits = zeros(Int, n, s, M)
-    indices = zeros(Int, n, m, s)
+    unrandomized_bits = zeros(Int, n, d, M)
+    indices = zeros(Int, n, m, d)
     prepare_nested_uniform_scramble!(unrandomized_bits, indices, points, b)
     return NestedUniformScrambler_b(unrandomized_bits, indices, b)
 end
 
 function prepare_nested_uniform_scramble!(bits, indices, points::AbstractArray, b::Integer)
-    for i in eachindex(view(points, 1:size(bits, 1), 1:size(bits, 2)))
-        bits[i, :] = unif2bits(points[i], b; M=size(bits, 3))
-    end
-    indices[:] = which_permutation(unrandomized_bits, b)
+    points2bits!(bits, points)
+    indices[:] = which_permutation(bits, b)
 end
 
 function scramble!(rng::AbstractRNG, random_points::AbstractArray, random_bits::AbstractArray{<:Integer,3}, sampler::NestedUniformScrambler_b)
@@ -125,9 +128,26 @@ struct LinearMatrixScrambler_b{F<:AbstractArray{<:Integer,3}} <: SamplerScrambli
     Bit::F
     base::Integer
 end
+""" 
+    nested_uniform_scramble(points::AbstractArray, b::Integer; M=32)
+Return a scrambled version of the `points`. 
+The scrambling method is Linear Matrix Scrambling Scrambling which was introduced in Matousek (1998).
+`M` is the number of bits used for each points. One need `M ≥ log(base, n)`. 
 """
-Matousek (1998) Linear Matrix Scrambling Scrambling
-"""
+linear_matrix_scramble(points::AbstractArray, b::Integer; M=32) = linear_matrix_scramble(default_rng(), points, b; M=M)
+function linear_matrix_scramble(rng::AbstractRNG, points::AbstractArray, b::Integer; M=32)
+    n, d = size(points)
+    m = logi(b, n)
+    unrandomized_bits = zeros(Int, n, d, M)
+    points2bits!(unrandomized_bits, points, b)
+    random_bits = similar(unrandomized_bits)
+    linear_matrix_scramble_bit!(rng, random_bits, unrandomized_bits, b)
+    random_points = similar(points)
+    for i in eachindex(view(random_points, 1:n, 1:d))
+        random_points[i] = bits2unif(random_bits[i, :], b)
+    end
+    return random_points
+end
 #? Weird it should be faster than nested uniform Scrambling but here it is not at all.-> look for other implementation and paper
 function scramble!(rng::AbstractRNG, random_points::AbstractArray, random_bits::AbstractArray{<:Integer,3}, sampler::LinearMatrixScrambler_b)
     linear_matrix_scramble_bit!(rng, random_bits, sampler.Bit, sampler.base)
@@ -160,14 +180,8 @@ function linear_matrix_scramble_bit!(rng::AbstractRNG, random_bits::AbstractArra
     end
 end
 
-function digital_shift!(rng::AbstractRNG, random_bits::AbstractVector{<:Integer}, b::Integer)
-    random_bits[:] = (random_bits[:] + rand(rng, 0:b-1, length(random_bits))) .% b
-end
-
-digital_shift!(random_bits, b) = digital_shift!(Random.GLOBAL_RNG, random_bits, b)
-
 function getmatousek(rng::AbstractRNG, J::Integer, b::Integer)
-    # Genereate the Matousek linear scramble in base b for one of the s components
+    # Genereate the Matousek linear scramble in base b for one of the d components
     # We need a J x J bit matrix M and a length J bit vector C
     #
     matousek_M = LowerTriangular(zeros(Int, J, J)) + Diagonal(rand(rng, 1:b-1, J)) # Mₖₖ ∼ U{1, ⋯, b-1}
