@@ -1,3 +1,13 @@
+"""
+    shift(x::AbstractArray) 
+Cranley Patterson Rotation i.e. `y = (x .+ U) mod 1` where `U ∼ 𝕌([0,1]ᵈ)` and `x` is a `n×d` matrix
+"""
+function shift(x::AbstractArray)
+    y = copy(x)
+    shift!(y)
+    return y
+end
+
 function shift!(x::AbstractMatrix{<:Real})
     d = size(x, 2)
     s = zeros(d)
@@ -40,3 +50,26 @@ end
 
 shift!(sampler::Shifter, x::AbstractMatrix{<:Real}, s::AbstractVector{<:Real}) = shift!(default_rng(), sampler, x, s)
 shift!(sampler::Shifter, x::AbstractMatrix{<:Real}) = shift!(default_rng(), sampler, x)
+
+function digital_shift(x::AbstractArray, b::Integer; M=32)
+    n, d = size(x)
+    bits = points2bits(x, b; M = M)
+    y = copy(x)
+    for s in 1:d
+        digital_shift!(@view(bits[:, s, :]), b)
+        for i in 1:n    
+            y[i, s] = bits2unif(bits[i, s, :], b)
+        end
+    end
+    return y
+end
+
+function digital_shift!(rng::AbstractRNG, random_bits::AbstractMatrix{<:Integer}, b::Integer)
+    n, M = size(random_bits)
+    DS = rand(rng, 0:b-1, M)
+    for i in 1:n
+        random_bits[i,:] = (random_bits[i, :] + DS) .% b
+    end
+end
+
+digital_shift!(random_bits, b) = digital_shift!(default_rng(), random_bits, b)
