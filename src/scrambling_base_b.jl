@@ -107,23 +107,6 @@ function which_permutation!(indices::AbstractMatrix{<:Integer}, bits::AbstractMa
     indices .+= 1 # array indexing starts at 1
 end
 
-#TODO add choice of dims
-function isequidistributed(x::AbstractMatrix, b::Integer; M=32, dims=:all)
-    n, d = size(x)
-    m = logi(b, n)
-    bits = zeros(Int, n, d, M)
-    for i in 1:n, s in 1:d
-        unif2bits!(@view(bits[i, s, :]), x[i, s], b)
-    end
-    indices = which_permutation(bits, b)
-    bool = zeros(Bool, d)
-    for s in 1:d
-        bool[s] = size(unique(indices[:, :, s], dims=1), 1) == n ÷ b
-    end
-    prod(bool)
-end
-
-
 struct LinearMatrixScrambler_b{F<:AbstractArray{<:Integer,3}} <: SamplerScrambling{Matrixvariate,Continuous}
     Bit::F
     base::Integer
