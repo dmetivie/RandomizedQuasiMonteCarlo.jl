@@ -62,7 +62,7 @@ end
 
 function unif2bits!(bits::AbstractVector, y, b::Integer)
     for j in eachindex(bits), bb in b-1:-1:1 # see comment on nested loop to justify this writing
-        a = y - bb // b^j
+        a = y - bb / b^j
         bool = a > 0
         if isapprox(a, 0, atol=3e-16) #! isequal(0.18518518518518515... -1/3^2-2/3^3 , 0) Should be true but is not! It fouls the binary expansion! Hence the isapprox with a hand tuned tolerence
             bits[j] = bb

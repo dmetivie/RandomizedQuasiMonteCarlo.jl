@@ -1,6 +1,7 @@
 # RandomizedQuasiMonteCarlo
 
-Documentation in construction.
+**This package will soon be deprecated as most of the relevant functionalities will be merged into [QuasiMonteCarlo.jl](https://github.com/SciML/QuasiMonteCarlo.jl) [PR57](https://github.com/SciML/QuasiMonteCarlo.jl/pull/57)**
+
 The purpose of this package is to provide randomization method of low discrepancy sequences.
 
 So far only [nested uniform scrambling](https://link.springer.com/chapter/10.1007/978-1-4612-2552-2_19), Cranley Patterson Rotation (shift mod 1) and Linear Matrix Scrambling.
