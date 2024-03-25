@@ -1,6 +1,8 @@
 # RandomizedQuasiMonteCarlo
 
-**This package will soon be deprecated as most of the relevant functionalities will be merged into [QuasiMonteCarlo.jl](https://github.com/SciML/QuasiMonteCarlo.jl) [PR57](https://github.com/SciML/QuasiMonteCarlo.jl/pull/57)**
+**This package is now deprecated. It has been "merged" with the [QuasiMonteCarlo.jl](https://github.com/SciML/QuasiMonteCarlo.jl) package with [PR57](https://github.com/SciML/QuasiMonteCarlo.jl/pull/57) All the randomization methods are now available there see [the doc](https://docs.sciml.ai/QuasiMonteCarlo/stable/randomization/) [QuasiMonteCarlo.jl](https://github.com/SciML/QuasiMonteCarlo.jl)**
+
+-------------
 
 The purpose of this package is to provide randomization method of low discrepancy sequences.
 
