@@ -1,6 +1,6 @@
 # RandomizedQuasiMonteCarlo
 
-**This package is now deprecated. It has been "merged" with the [QuasiMonteCarlo.jl](https://github.com/SciML/QuasiMonteCarlo.jl) package with [PR57](https://github.com/SciML/QuasiMonteCarlo.jl/pull/57) All the randomization methods are now available there see [the doc](https://docs.sciml.ai/QuasiMonteCarlo/stable/randomization/) [QuasiMonteCarlo.jl](https://github.com/SciML/QuasiMonteCarlo.jl)**
+**This package is now deprecated. It has been "merged" with the [QuasiMonteCarlo.jl](https://github.com/SciML/QuasiMonteCarlo.jl) package with [PR57](https://github.com/SciML/QuasiMonteCarlo.jl/pull/57) All the randomization methods are now available there see [the doc](https://docs.sciml.ai/QuasiMonteCarlo/stable/randomization/).**
 
 -------------
 
